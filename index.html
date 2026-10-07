@@ -1,6 +1,41 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+ <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, onSnapshot }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyBEAE52Ls9lepCuKQVZdAr5bA-1PNAH4Xc",
+
+  authDomain: "starosta-1e022.firebaseapp.com",
+
+  databaseURL: "https://starosta-1e022-default-rtdb.europe-west1.firebasedatabase.app",
+
+  projectId: "starosta-1e022",
+
+  storageBucket: "starosta-1e022.firebasestorage.app",
+
+  messagingSenderId: "99505717855",
+
+  appId: "1:99505717855:web:e74e8e7e83566949a7d1ea"
+
+};
+
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  // Публикуем в window, чтобы пользоваться из обычного скрипта
+  window.fb = {
+    save: (data) => setDoc(doc(db, "starosta", "group"), data, { merge: true }),
+    subscribe: (cb) => onSnapshot(doc(db, "starosta", "group"), snap => {
+      if (snap.exists()) cb(snap.data());
+    })
+  };
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0a0e27">
@@ -603,27 +638,45 @@ let state = { students: null, attendance: {}, notes: {} };
 let students = [];
 let currentDate = todayISO();
 
-function todayISO() {
-  const d = new Date();
-  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+let cloudReady = false;
+
+function saveState() {
+  // Локально — быстро
+  localStorage.setItem("starosta_state_v2", JSON.stringify(state));
+
+  // В облако — если доступно
+  if (window.fb && cloudReady) {
+    window.fb.save(state).catch(e => console.warn("cloud save:", e));
+  }
 }
 
 function loadState() {
+  // 1. Сначала локально — мгновенно
   try {
     const raw = localStorage.getItem("starosta_state_v2");
     if (raw) {
       const s = JSON.parse(raw);
-      if (s && typeof s === "object") {
-        state.students   = s.students   || null;
-        state.attendance = s.attendance || {};
-        state.notes      = s.notes      || {};
-      }
+      state.students   = s.students   || null;
+      state.attendance = s.attendance || {};
+      state.notes      = s.notes      || {};
     }
   } catch (e) {}
-}
 
-function saveState() {
-  localStorage.setItem("starosta_state_v2", JSON.stringify(state));
+  // 2. Потом — подписка на облако (реальное время!)
+  if (window.fb) {
+    window.fb.subscribe(remote => {
+      cloudReady = true;
+      state.students   = remote.students   || state.students;
+      state.attendance = remote.attendance || {};
+      state.notes      = remote.notes      || {};
+      students = state.students || DEFAULT_STUDENTS.slice();
+      localStorage.setItem("starosta_state_v2", JSON.stringify(state));
+      if (document.getElementById("list")) render();
+      if (document.getElementById("journalView").style.display === "block") renderJournal();
+    });
+  } else {
+    cloudReady = true;
+  }
 }
 
 /* ================= ВХОД ================= */
