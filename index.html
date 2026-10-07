@@ -723,11 +723,14 @@ async function loadRemoteStudents() {
 
 async function init() {
   loadState();
-  const remote = await loadRemoteStudents();
-  if (remote) state.students = remote;
-  if (!state.students || !state.students.length) state.students = DEFAULT_STUDENTS.slice();
+
+  // Ждём первую синхронизацию с облаком (максимум 1.5 сек)
+  await new Promise(r => setTimeout(r, 1500));
+
+  if (!state.students || !state.students.length) {
+    state.students = DEFAULT_STUDENTS.slice();
+  }
   students = state.students;
-  saveState();
   document.getElementById("dateInput").value = currentDate;
   render();
   registerSW();
