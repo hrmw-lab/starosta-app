@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0e27">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Помощник старосты</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg-1: #000000;
+    --bg-2: #0a0e27;
+    --bg-3: #0d1b3e;
+    --accent: #2b6cff;
+    --accent-2: #00d4ff;
+    --accent-glow: rgba(43, 108, 255, .45);
+    --glass: rgba(255, 255, 255, .06);
+    --glass-border: rgba(255, 255, 255, .12);
+    --text: #e8ecf5;
+    --text-dim: #8a93a8;
+    --green: #00e58a;
+    --red: #ff4d6d;
+    --amber: #ffb340;
+  }
+
+  html, body { min-height: 100%; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--text);
+    padding: 16px;
+    padding-bottom: 80px;
+    max-width: 900px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(43,108,255,.35), transparent 45%),
+      radial-gradient(circle at 100% 100%, rgba(0,212,255,.22), transparent 45%),
+      radial-gradient(circle at 50% 50%, rgba(13,27,62,.6), transparent 70%),
+      linear-gradient(160deg, var(--bg-1) 0%, var(--bg-2) 50%, var(--bg-3) 100%);
+    background-attachment: fixed;
+    position: relative;
+  }
+
+  /* Декоративные «звёзды» */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background-image:
+      radial-gradient(1.5px 1.5px at 20% 30%, rgba(255,255,255,.5), transparent),
+      radial-gradient(1px 1px at 80% 20%, rgba(255,255,255,.35), transparent),
+      radial-gradient(1.5px 1.5px at 60% 70%, rgba(0,212,255,.5), transparent),
+      radial-gradient(1px 1px at 30% 80%, rgba(255,255,255,.3), transparent),
+      radial-gradient(1px 1px at 90% 60%, rgba(43,108,255,.6), transparent);
+    pointer-events: none;
+    z-index: 0;
+    opacity: .8;
+  }
+
+  body > * { position: relative; z-index: 1; }
+
+  /* ================= ЭКРАН ВХОДА ================= */
+  #loginScreen {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(43,108,255,.4), transparent 60%),
+      radial-gradient(circle at 50% 100%, rgba(0,212,255,.25), transparent 60%),
+      linear-gradient(160deg, #000 0%, #0a0e27 60%, #0d1b3e 100%);
+  }
+
+  .login-box {
+    background: var(--glass);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--glass-border);
+    padding: 32px 24px;
+    border-radius: 22px;
+    width: 90%; max-width: 380px;
+    box-shadow:
+      0 20px 60px rgba(0,0,0,.7),
+      inset 0 1px 0 rgba(255,255,255,.08);
+    text-align: center;
+  }
+
+  .login-box .logo {
+    width: 64px; height: 64px;
+    margin: 0 auto 14px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px;
+    box-shadow: 0 0 30px var(--accent-glow);
+  }
+
+  .login-box h2 {
+    font-size: 21px;
+    margin-bottom: 6px;
+    background: linear-gradient(135deg, #fff, #8ab4ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .login-box p { color: var(--text-dim); font-size: 13px; margin-bottom: 20px; }
+
+  .login-box input {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 16px;
+    background: rgba(0,0,0,.35);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    margin-bottom: 14px;
+    text-align: center;
+    letter-spacing: 3px;
+    color: #fff;
+    transition: .2s;
+  }
+  .login-box input::placeholder { color: #4a5470; letter-spacing: 1px; }
+  .login-box input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(43,108,255,.2), 0 0 24px var(--accent-glow);
+  }
+
+  .login-box button {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: .5px;
+    box-shadow: 0 8px 24px var(--accent-glow);
+    transition: .2s;
+  }
+  .login-box button:hover { transform: translateY(-2px); box-shadow: 0 12px 32px var(--accent-glow); }
+  .login-box button:active { transform: translateY(0); }
+
+  .login-box .error {
+    color: var(--red);
+    font-size: 13px;
+    margin-top: 12px;
+    min-height: 18px;
+    text-shadow: 0 0 12px rgba(255,77,109,.5);
+  }
+
+  /* ================= ЗАГОЛОВОК ================= */
+  h1 {
+    font-size: 22px;
+    background: linear-gradient(135deg, #fff 0%, #8ab4ff 60%, #00d4ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+  }
+  .subtitle { color: var(--text-dim); font-size: 13px; margin-top: 2px; margin-bottom: 16px; }
+
+  /* ================= ВКЛАДКИ ================= */
+  .tabs {
+    display: flex; gap: 6px;
+    margin-bottom: 16px;
+    background: var(--glass);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    padding: 6px;
+    border-radius: 14px;
+    border: 1px solid var(--glass-border);
+  }
+  .tabs button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: .25s;
+  }
+  .tabs button.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    box-shadow: 0 6px 20px var(--accent-glow);
+  }
+
+  /* ================= ВЕРХНЯЯ ПАНЕЛЬ ДАТЫ ================= */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 8px;
+  }
+
+  .date-picker {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--glass);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--glass-border);
+    padding: 10px 14px;
+    border-radius: 14px;
+  }
+  .date-picker .icon { font-size: 16px; }
+  .date-picker input {
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    background: transparent;
+    flex: 1;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .date-picker input:focus { outline: none; }
+  .date-picker input::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(1.5);
+    cursor: pointer;
+    opacity: .7;
+  }
+
+  .date-nav { display: flex; gap: 6px; }
+  .date-nav button {
+    width: 42px; height: 42px;
+    background: var(--glass);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 15px;
+    color: #fff;
+    transition: .2s;
+  }
+  .date-nav button:hover {
+    background: rgba(43,108,255,.25);
+    border-color: var(--accent);
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+
+  /* ================= ПАНЕЛЬ КНОПОК ================= */
+  .toolbar {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .toolbar button {
+    padding: 10px 14px;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    background: var(--glass);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: .2s;
+  }
+  .toolbar button:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 18px var(--accent-glow);
+    transform: translateY(-1px);
+  }
+  .toolbar button.primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    box-shadow: 0 6px 20px var(--accent-glow);
+  }
+  .toolbar button.primary:hover {
+    box-shadow: 0 10px 28px var(--accent-glow);
+  }
+  .toolbar button.logout {
+    margin-left: auto;
+    background: rgba(255,77,109,.15);
+    border-color: rgba(255,77,109,.4);
+    color: #ff8fa3;
+  }
+  .toolbar button.logout:hover {
+    background: rgba(255,77,109,.25);
+    box-shadow: 0 0 18px rgba(255,77,109,.4);
+  }
+
+  /* ================= СТАТИСТИКА ================= */
+  .stats {
+    display: flex; gap: 8px;
+    margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .stat {
+    flex: 1; min-width: 90px;
+    background: var(--glass);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--glass-border);
+    padding: 12px 8px;
+    border-radius: 14px;
+    text-align: center;
+    transition: .25s;
+  }
+  .stat:hover { border-color: var(--accent); }
+  .stat b {
+    display: block;
+    font-size: 22px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff, var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .stat span { font-size: 11px; color: var(--text-dim); letter-spacing: .5px; text-transform: uppercase; }
+
+  /* ================= КАРТОЧКА СТУДЕНТА ================= */
+  .student {
+    background: var(--glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    padding: 14px;
+    border-radius: 16px;
+    margin-bottom: 10px;
+    transition: .25s;
+  }
+  .student:hover {
+    border-color: rgba(43,108,255,.4);
+    box-shadow: 0 8px 24px rgba(0,0,0,.4), 0 0 20px rgba(43,108,255,.15);
+  }
+  .student .row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .student .name {
+    flex: 1;
+    font-weight: 500;
+    font-size: 15px;
+    color: #fff;
+  }
+
+  /* ================= КНОПКИ СТАТУСА ================= */
+  .status-btns { display: flex; gap: 6px; }
+  .status-btns button {
+    width: 38px; height: 38px;
+    font-size: 15px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    cursor: pointer;
+    color: var(--text-dim);
+    transition: .2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .status-btns button:hover {
+    color: #fff;
+    border-color: rgba(255,255,255,.3);
+  }
+  .status-btns button.active[data-s="present"] {
+    background: linear-gradient(135deg, #00e58a, #00a86b);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(0,229,138,.5);
+  }
+  .status-btns button.active[data-s="absent"] {
+    background: linear-gradient(135deg, #ff4d6d, #c9184a);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(255,77,109,.5);
+  }
+  .status-btns button.active[data-s="excused"] {
+    background: linear-gradient(135deg, #ffb340, #e08500);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(255,179,64,.5);
+  }
+
+  /* ================= ЗАМЕТКИ ================= */
+  .note {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: rgba(0,0,0,.3);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    font-size: 13px;
+    resize: vertical;
+    min-height: 38px;
+    font-family: inherit;
+    color: #fff;
+    transition: .2s;
+  }
+  .note::placeholder { color: #4a5470; }
+  .note:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(43,108,255,.15);
+  }
+
+  /* ================= ЖУРНАЛ ================= */
+  #journalView { display: none; }
+
+  .journal-wrapper {
+    background: var(--glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .journal-table { font-size: 12px; min-width: 100%; }
+  .journal-table table { width: 100%; border-collapse: collapse; }
+  .journal-table th, .journal-table td {
+    padding: 8px 6px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    white-space: nowrap;
+  }
+  .journal-table th {
+    background: rgba(0,0,0,.35);
+    font-weight: 700;
+    font-size: 11px;
+    color: var(--accent-2);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    position: sticky; top: 0;
+    backdrop-filter: blur(10px);
+  }
+  .journal-table th:first-child,
+  .journal-table td.name {
+    position: sticky; left: 0;
+    background: rgba(10,14,39,.95);
+    backdrop-filter: blur(10px);
+    text-align: left;
+    padding-left: 12px;
+    font-weight: 500;
+    color: #fff;
+    min-width: 140px;
+    z-index: 2;
+  }
+  .journal-table tr:hover td { background: rgba(43,108,255,.08); }
+
+  .mark {
+    display: inline-flex;
+    align-items: center; justify-content: center;
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0;
+  }
+  .mark.p { background: rgba(0,229,138,.18); color: #00e58a; border: 1px solid rgba(0,229,138,.4); }
+  .mark.a { background: rgba(255,77,109,.18); color: #ff4d6d; border: 1px solid rgba(255,77,109,.4); }
+  .mark.e { background: rgba(255,179,64,.18); color: #ffb340; border: 1px solid rgba(255,179,64,.4); }
+
+  /* ================= ФУТЕР ================= */
+  .footer {
+    margin-top: 22px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: .5px;
+  }
+
+  /* ================= ТОСТ ================= */
+  .toast {
+    position: fixed;
+    bottom: 30px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: linear-gradient(135deg, rgba(43,108,255,.95), rgba(0,212,255,.95));
+    color: #fff;
+    padding: 12px 22px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 2000;
+    opacity: 0;
+    transition: .3s;
+    box-shadow: 0 10px 40px var(--accent-glow);
+    backdrop-filter: blur(12px);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ================= СКРОЛЛБАР ================= */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: rgba(0,0,0,.3); }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--accent), var(--accent-2));
+    border-radius: 4px;
+  }
+
+  /* ================= МОБИЛЬНЫЙ ================= */
+  @media (max-width: 500px) {
+    body { padding: 12px; }
+    h1 { font-size: 19px; }
+    .toolbar button { font-size: 12px; padding: 9px 11px; }
+    .status-btns button { width: 34px; height: 34px; }
+    .stat b { font-size: 19px; }
+    .journal-table { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ ЭКРАН ВХОДА ============ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="logo">📋</div>
+    <h2>Помощник старосты</h2>
+    <p>Введите пароль для доступа</p>
+    <input type="password" id="passwordInput" placeholder="••••" maxlength="20" autocomplete="current-password">
+    <button onclick="tryLogin()">Войти</button>
+    <div class="error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ============ ОСНОВНОЙ ЭКРАН ============ -->
+<div id="appScreen" style="display:none">
+
+  <h1>📋 Помощник старосты</h1>
+  <div class="subtitle" id="groupName">Группа ИС-21</div>
+
+  <div class="tabs">
+    <button class="active" onclick="switchTab('day')" id="tabDay">📅 Посещаемость</button>
+    <button onclick="switchTab('journal')" id="tabJournal">📊 Журнал</button>
+  </div>
+
+  <!-- === ВКЛАДКА: ПОСЕЩАЕМОСТЬ ЗА ДЕНЬ === -->
+  <div id="dayView">
+    <div class="topbar">
+      <div class="date-picker">
+        <span class="icon">📅</span>
+        <input type="date" id="dateInput" onchange="changeDate(this.value)">
+      </div>
+      <div class="date-nav">
+        <button onclick="shiftDate(-1)">◀</button>
+        <button onclick="shiftDate(1)">▶</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button class="primary" onclick="saveAll()">💾 Сохранить</button>
+      <button onclick="markAll('present')">✓ Все</button>
+      <button onclick="exportCSV()">📤 Экспорт</button>
+      <button onclick="syncFromServer()">☁️ Обновить</button>
+      <button class="logout" onclick="logout()">Выйти</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><b id="statTotal">0</b><span>Всего</span></div>
+      <div class="stat"><b id="statPresent">0</b><span>Присут.</span></div>
+      <div class="stat"><b id="statAbsent">0</b><span>Отсут.</span></div>
+      <div class="stat"><b id="statExcused">0</b><span>Уваж.</span></div>
+    </div>
+
+    <div id="list"></div>
+  </div>
+
+  <!-- === ВКЛАДКА: ЖУРНАЛ ЗА ВСЁ ВРЕМЯ === -->
+  <div id="journalView">
+    <div class="toolbar">
+      <button class="primary" onclick="exportJournalCSV()">📤 Экспорт журнала</button>
+      <button onclick="renderJournal()">🔄 Обновить</button>
+    </div>
+    <div id="journalContent"></div>
+  </div>
+
+  <div class="footer">
+    v2.1 · PWA · данные в браузере
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   НАСТРОЙКИ
+   ============================================================ */
+const PASSWORD = "90055";
+const REMOTE_URL = "";
+
+const DEFAULT_STUDENTS = [
+  "Абрамов Иван","Белова Мария","Волков Дмитрий","Гусева Анна",
+  "Дмитриев Пётр","Егорова Ольга","Жуков Артём","Зайцева Екатерина",
+  "Иванов Сергей","Кузнецова Дарья","Лебедев Никита","Морозова Виктория",
+  "Новиков Алексей","Орлова Полина","Петров Роман","Романова Алиса",
+  "Соколов Максим","Тимофеева Юлия","Фёдоров Егор","Царёва София"
+];
+
+let state = { students: null, attendance: {}, notes: {} };
+let students = [];
+let currentDate = todayISO();
+
+function todayISO() {
+  const d = new Date();
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem("starosta_state_v2");
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (s && typeof s === "object") {
+        state.students   = s.students   || null;
+        state.attendance = s.attendance || {};
+        state.notes      = s.notes      || {};
+      }
+    }
+  } catch (e) {}
+}
+
+function saveState() {
+  localStorage.setItem("starosta_state_v2", JSON.stringify(state));
+}
+
+/* ================= ВХОД ================= */
+function tryLogin() {
+  const input = document.getElementById("passwordInput");
+  const err   = document.getElementById("loginError");
+  if (input.value === PASSWORD) {
+    sessionStorage.setItem("starosta_auth", "1");
+    showApp();
+  } else {
+    err.textContent = "Неверный пароль";
+    input.value = "";
+    input.focus();
+  }
+}
+
+document.getElementById("passwordInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") tryLogin();
+});
+
+function logout() {
+  if (!confirm("Выйти из приложения?")) return;
+  sessionStorage.removeItem("starosta_auth");
+  location.reload();
+}
+
+function showApp() {
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("appScreen").style.display = "block";
+  init();
+}
+
+/* ================= ИНИЦИАЛИЗАЦИЯ ================= */
+async function loadRemoteStudents() {
+  if (!REMOTE_URL) return null;
+  try {
+    const r = await fetch(REMOTE_URL + "?t=" + Date.now());
+    if (!r.ok) return null;
+    const data = await r.json();
+    if (Array.isArray(data.students)) return data.students;
+  } catch (e) { console.warn("remote load failed:", e); }
+  return null;
+}
+
+async function init() {
+  loadState();
+  const remote = await loadRemoteStudents();
+  if (remote) state.students = remote;
+  if (!state.students || !state.students.length) state.students = DEFAULT_STUDENTS.slice();
+  students = state.students;
+  saveState();
+  document.getElementById("dateInput").value = currentDate;
+  render();
+  registerSW();
+}
+
+/* ================= РЕНДЕР ДНЯ ================= */
+function render() {
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+  const day = state.attendance[currentDate] || {};
+  const dayNotes = state.notes[currentDate] || {};
+
+  students.forEach((name, idx) => {
+    const status = day[name] || "";
+    const note   = dayNotes[name] || "";
+
+    const el = document.createElement("div");
+    el.className = "student";
+    el.innerHTML = `
+      <div class="row">
+        <div class="name">${idx + 1}. ${escapeHtml(name)}</div>
+        <div class="status-btns">
+          <button data-s="present" class="${status==='present'?'active':''}" title="Присутствует">✓</button>
+          <button data-s="absent"  class="${status==='absent' ?'active':''}" title="Отсутствует">✗</button>
+          <button data-s="excused" class="${status==='excused'?'active':''}" title="Уважительная">~</button>
+        </div>
+      </div>
+      <textarea class="note" placeholder="Заметка...">${escapeHtml(note)}</textarea>
+    `;
+
+    el.querySelectorAll(".status-btns button").forEach(btn => {
+      btn.onclick = () => {
+        const s = btn.dataset.s;
+        setStatus(currentDate, name, day[name] === s ? "" : s);
+        render();
+      };
+    });
+
+    const noteEl = el.querySelector(".note");
+    noteEl.oninput = () => setNote(currentDate, name, noteEl.value);
+
+    list.appendChild(el);
+  });
+
+  updateStats();
+}
+
+function setStatus(date, name, status) {
+  if (!state.attendance[date]) state.attendance[date] = {};
+  if (status) state.attendance[date][name] = status;
+  else delete state.attendance[date][name];
+  saveState();
+}
+
+function setNote(date, name, text) {
+  if (!state.notes[date]) state.notes[date] = {};
+  if (text) state.notes[date][name] = text;
+  else delete state.notes[date][name];
+  saveState();
+}
+
+function updateStats() {
+  const day = state.attendance[currentDate] || {};
+  let p = 0, a = 0, e = 0;
+  students.forEach(n => {
+    if (day[n] === "present") p++;
+    else if (day[n] === "absent") a++;
+    else if (day[n] === "excused") e++;
+  });
+  document.getElementById("statTotal").textContent   = students.length;
+  document.getElementById("statPresent").textContent = p;
+  document.getElementById("statAbsent").textContent  = a;
+  document.getElementById("statExcused").textContent = e;
+}
+
+/* ================= ДАТА ================= */
+function changeDate(val) {
+  currentDate = val || todayISO();
+  render();
+}
+
+function shiftDate(delta) {
+  const d = new Date(currentDate);
+  d.setDate(d.getDate() + delta);
+  currentDate = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  document.getElementById("dateInput").value = currentDate;
+  render();
+}
+
+/* ================= ДЕЙСТВИЯ ================= */
+function saveAll() {
+  saveState();
+  toast("Сохранено ✅");
+}
+
+function markAll(status) {
+  if (!state.attendance[currentDate]) state.attendance[currentDate] = {};
+  students.forEach(n => state.attendance[currentDate][n] = status);
+  saveState();
+  render();
+}
+
+async function syncFromServer() {
+  const remote = await loadRemoteStudents();
+  if (remote) {
+    state.students = remote;
+    students = remote;
+    saveState();
+    render();
+    toast("Список обновлён ☁️");
+  } else {
+    toast("REMOTE_URL не настроен");
+  }
+}
+
+/* ================= ЭКСПОРТ CSV ================= */
+function exportCSV() {
+  const day = state.attendance[currentDate] || {};
+  const notes = state.notes[currentDate] || {};
+  const rows = [["№", "ФИО", "Статус", "Заметка"]];
+  students.forEach((name, i) => {
+    const s = day[name] || "";
+    const label = s === "present" ? "Присутствует"
+                : s === "absent"  ? "Отсутствует"
+                : s === "excused" ? "Уважительная" : "";
+    rows.push([i+1, name, label, notes[name] || ""]);
+  });
+  downloadCSV(rows, "starosta_" + currentDate + ".csv");
+}
+
+function exportJournalCSV() {
+  const dates = Object.keys(state.attendance).sort();
+  if (!dates.length) { toast("Нет данных журнала"); return; }
+  const header = ["ФИО", ...dates];
+  const rows = [header];
+  students.forEach(name => {
+    const row = [name];
+    dates.forEach(d => {
+      const s = (state.attendance[d] || {})[name];
+      row.push(s === "present" ? "П" : s === "absent" ? "Н" : s === "excused" ? "У" : "");
+    });
+    rows.push(row);
+  });
+  downloadCSV(rows, "journal_" + todayISO() + ".csv");
+}
+
+function downloadCSV(rows, filename) {
+  const csv = rows.map(r =>
+    r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(";")
+  ).join("\n");
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ================= ЖУРНАЛ ================= */
+function renderJournal() {
+  const dates = Object.keys(state.attendance).sort();
+  const box = document.getElementById("journalContent");
+  if (!dates.length) {
+    box.innerHTML = `<div class="student" style="text-align:center;color:#8a93a8;padding:30px">
+      Пока нет данных. Отметьте посещаемость за какой-нибудь день.
+    </div>`;
+    return;
+  }
+
+  const heads = dates.map(d => {
+    const [, m, dd] = d.split("-");
+    return `<th title="${d}">${dd}.${m}</th>`;
+  }).join("");
+
+  let html = `<div class="journal-wrapper"><div class="journal-table"><table>
+    <thead><tr><th>ФИО</th>${heads}</tr></thead><tbody>`;
+
+  students.forEach(name => {
+    let cells = "";
+    dates.forEach(d => {
+      const s = (state.attendance[d] || {})[name];
+      if (s === "present") cells += `<td><span class="mark p">П</span></td>`;
+      else if (s === "absent") cells += `<td><span class="mark a">Н</span></td>`;
+      else if (s === "excused") cells += `<td><span class="mark e">У</span></td>`;
+      else cells += `<td style="color:#4a5470">—</td>`;
+    });
+    html += `<tr><td class="name">${escapeHtml(name)}</td>${cells}</tr>`;
+  });
+
+  html += `</tbody></table></div></div>
+    <div style="margin-top:12px;font-size:12px;color:#8a93a8;text-align:center">
+      <span class="mark p" style="vertical-align:middle">П</span> присутствовал ·
+      <span class="mark a" style="vertical-align:middle">Н</span> отсутствовал ·
+      <span class="mark e" style="vertical-align:middle">У</span> уважительная
+    </div>`;
+  box.innerHTML = html;
+}
+
+/* ================= ВКЛАДКИ ================= */
+function switchTab(tab) {
+  document.getElementById("tabDay").classList.toggle("active", tab === "day");
+  document.getElementById("tabJournal").classList.toggle("active", tab === "journal");
+  document.getElementById("dayView").style.display     = tab === "day" ? "block" : "none";
+  document.getElementById("journalView").style.display = tab === "journal" ? "block" : "none";
+  if (tab === "journal") renderJournal();
+}
+
+/* ================= PWA ================= */
+function registerSW() {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(e => console.warn("SW:", e));
+  }
+}
+
+/* ================= УТИЛИТЫ ================= */
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
+}
+
+function toast(msg) {
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.textContent = msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(() => t.classList.add("show"));
+  setTimeout(() => {
+    t.classList.remove("show");
+    setTimeout(() => t.remove(), 300);
+  }, 1600);
+}
+
+/* ================= СТАРТ ================= */
+if (sessionStorage.getItem("starosta_auth") === "1") {
+  showApp();
+} else {
+  setTimeout(() => document.getElementById("passwordInput").focus(), 300);
+}
+</script>
+</body>
+</html>
