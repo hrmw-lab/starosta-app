@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+  const firebaseConfig = {
+  apiKey: "AIzaSyBEAE52Ls9lepCuKQVZdAr5bA-1PNAH4Xc",
+  authDomain: "starosta-1e022.firebaseapp.com",
+  databaseURL: "https://starosta-1e022-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "starosta-1e022",
+  storageBucket: "starosta-1e022.firebasestorage.app",
+  messagingSenderId: "99505717855",
+  appId: "1:99505717855:web:e74e8e7e83566949a7d1ea"
+};
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0a0e27">
@@ -9,41 +18,6 @@
 <title>Помощник старосты</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
-  <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, doc, setDoc, onSnapshot }
-    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-
-  apiKey: "AIzaSyBEAE52Ls9lepCuKQVZdAr5bA-1PNAH4Xc",
-
-  authDomain: "starosta-1e022.firebaseapp.com",
-
-  databaseURL: "https://starosta-1e022-default-rtdb.europe-west1.firebasedatabase.app",
-
-  projectId: "starosta-1e022",
-
-  storageBucket: "starosta-1e022.firebasestorage.app",
-
-  messagingSenderId: "99505717855",
-
-  appId: "1:99505717855:web:e74e8e7e83566949a7d1ea"
-
-};
-
-
-  const app = initializeApp(firebaseConfig);
-  const db  = getFirestore(app);
-
-  // Публикуем в window, чтобы пользоваться из обычного скрипта
-  window.fb = {
-    save: (data) => setDoc(doc(db, "starosta", "group"), data, { merge: true }),
-    subscribe: (cb) => onSnapshot(doc(db, "starosta", "group"), snap => {
-      if (snap.exists()) cb(snap.data());
-    })
-  };
-</script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
